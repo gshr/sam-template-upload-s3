@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform:  AWS::Serverless-2016-10-31
+Description: Example of uploading image to s3
+
+Resources:
+  MyBucket:
+    Type : AWS::S3::Bucket
+    Properties:
+      BucketName : images3preprocessing
+
+  MyDatabaseTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName : id
+          AttributeType : S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      TableName: s3_upload_records
+
+  MyLambdaFunction:
+    Type : AWS::Serverless::Function
+    Properties:
+      Handler : main.handler
+      Runtime : python3.9
+      CodeUri : .
+      Policies:
+        - DynamoDBWritePolicy:
+             TableName: !Ref MyDatabaseTable
+
+        - S3FullAccessPolicy:
+             BucketName: !Ref MyBucket
+      Environment:
+          Variables:
+            AWS_BUCKET_NAME : !Ref MyBucket
+            TABLE_NAME: !Ref MyDatabaseTable
+      Events:
+        HttpPost:
+          Type : Api
+          Properties:
+            Path : '/upload'
+            Method : post
+
+
+
+
+
