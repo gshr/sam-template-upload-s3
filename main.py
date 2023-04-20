@@ -17,6 +17,17 @@ table = dynamodb.Table(TABLE_NAME)
 
 @app.post('/upload')
 def upload_image(file: UploadFile = File(...)):
+    """
+
+    :param file:  a file object
+
+    :return:    response = {
+                "statusCode": 200,
+                "body": {
+                    "message": "Upload successfully"
+                }
+    }
+    """
     id = str(uuid.uuid4())
     filename = f"{id}{file.filename}"
     s3.upload_fileobj(file.file, BUCKET_NAME, filename)
